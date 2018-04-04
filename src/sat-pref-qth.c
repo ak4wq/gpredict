@@ -214,6 +214,16 @@ static GtkWidget *create_qth_list()
     gtk_tree_view_insert_column(GTK_TREE_VIEW(qthlist), column, -1);
     gtk_tree_view_column_set_alignment(column, 0.5);
 
+    /* minimum elevation column */
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes(_("Min.EL"),
+                                                      renderer,
+                                                      "text",
+                                                      QTH_LIST_COL_MINEL,
+                                                      NULL);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW(qthlist), column, -1);
+    gtk_tree_view_column_set_alignment(column, 0.5);
+
     /* locator */
     renderer = gtk_cell_renderer_text_new();
     column = gtk_tree_view_column_new_with_attributes(_("QRA"), renderer,
@@ -301,6 +311,7 @@ static GtkTreeModel *create_and_fill_model()
                                    G_TYPE_DOUBLE,       // Latitude
                                    G_TYPE_DOUBLE,       // Longitude
                                    G_TYPE_INT,  // Altitude
+                                   G_TYPE_INT,  // Minimum elevation
                                    G_TYPE_STRING,       // QRA locator
                                    G_TYPE_STRING,       // Weather station
                                    G_TYPE_BOOLEAN,      // Default
@@ -467,6 +478,7 @@ static guint read_qth_file(GtkListStore * liststore, gchar * filename)
                        QTH_LIST_COL_LAT, qth->lat,
                        QTH_LIST_COL_LON, qth->lon,
                        QTH_LIST_COL_ALT, dispalt,
+                       QTH_LIST_COL_MINEL, qth->minel,
                        QTH_LIST_COL_QRA, qth->qra,
                        QTH_LIST_COL_WX, qth->wx,
                        QTH_LIST_COL_DEF, is_default,
@@ -828,6 +840,7 @@ static gboolean save_qth(GtkTreeModel * model, GtkTreePath * path,
                        QTH_LIST_COL_LAT, &qth.lat,
                        QTH_LIST_COL_LON, &qth.lon,
                        QTH_LIST_COL_ALT, &qth.alt,
+                       QTH_LIST_COL_MINEL, &qth.minel,
                        QTH_LIST_COL_WX, &qth.wx,
                        QTH_LIST_COL_TYPE, &qth.type,
                        QTH_LIST_COL_GPSD_SERVER, &qth.gpsd_server,

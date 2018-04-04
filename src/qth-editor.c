@@ -49,6 +49,7 @@ static GtkWidget *dialog;       /* dialog window */
 static GtkWidget *name;         /* QTH name */
 static GtkWidget *location;     /* QTH location */
 static GtkWidget *desc;         /* QTH description */
+static GtkWidget *minel;         /* Minimun elevation */
 static GtkWidget *lat, *lon, *alt;      /* LAT, LON and ALT */
 static GtkWidget *ns, *ew;
 static GtkWidget *qra;          /* QRA locator */
@@ -82,6 +83,8 @@ static void update_widgets(qth_t * qth)
     else
         gtk_combo_box_set_active(GTK_COMBO_BOX(ns), 0);
 
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(minel), qth->minel);
+
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(lat), fabs(qth->lat));
 
     if (qth->lon < 0.00)
@@ -110,6 +113,7 @@ static void clear_widgets()
     gtk_entry_set_text(GTK_ENTRY(location), "");
     gtk_entry_set_text(GTK_ENTRY(desc), "");
     gtk_entry_set_text(GTK_ENTRY(wx), "");
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(minel), 0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(lat), 0.0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(lon), 0.0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(alt), 0);
@@ -139,6 +143,7 @@ static gboolean apply_changes(qth_t * qth)
     gdouble         qthlat;
     gdouble         qthlon;
     guint           qthalt;
+    guint           qthminel;
     gchar          *fname, *confdir;
     gboolean        retcode;
 
@@ -156,6 +161,7 @@ static gboolean apply_changes(qth_t * qth)
     if (gtk_combo_box_get_active(GTK_COMBO_BOX(ew)))
         qthlon = -qthlon;
 
+    qthminel = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(minel));
     qthalt = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(alt));
     qthqra = gtk_entry_get_text(GTK_ENTRY(qra));
 
@@ -191,6 +197,7 @@ static gboolean apply_changes(qth_t * qth)
     qth->lat = qthlat;
     qth->lon = qthlon;
     qth->alt = qthalt;
+    qth->minel = qthminel;
 
     /* store values */
     confdir = get_user_conf_dir();
@@ -266,6 +273,7 @@ static void select_location(GtkWidget * widget, gpointer data)
     gfloat          qthlat;
     gfloat          qthlon;
     guint           qthalt;
+    guint           qthminel;
     gboolean        selected = FALSE;
 
     (void)widget;
@@ -283,14 +291,14 @@ static void select_location(GtkWidget * widget, gpointer data)
     default:
         flags = TREE_COL_FLAG_NAME |
             TREE_COL_FLAG_LAT |
-            TREE_COL_FLAG_LON | TREE_COL_FLAG_ALT | TREE_COL_FLAG_WX;
+            TREE_COL_FLAG_LON | TREE_COL_FLAG_MINEL | TREE_COL_FLAG_ALT | TREE_COL_FLAG_WX;
 
         mode = SELECTION_MODE_LOC;
         break;
     }
 
     selected = loc_tree_create(NULL, flags, &qthloc, &qthlat, &qthlon,
-                               &qthalt, &qthwx);
+                               &qthalt, &qthminel, &qthwx);
 
     if (selected)
     {
@@ -317,6 +325,7 @@ static void select_location(GtkWidget * widget, gpointer data)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ew), 0);
 
             gtk_spin_button_set_value(GTK_SPIN_BUTTON(alt), qthalt);
+            gtk_spin_button_set_value(GTK_SPIN_BUTTON(minel), qthminel);
             break;
         default:
             /*** FIXME: add some error reporting */
@@ -608,21 +617,37 @@ static GtkWidget *create_editor_widgets(qth_t * qth)
     g_object_set(label, "xalign", 0.0f, "yalign", 0.5f, NULL);
     gtk_grid_attach(GTK_GRID(table), label, 2, 6, 1, 1);
 
+    /* minimum elevation */
+    label = gtk_label_new(_("Minimum elevation"));
+    g_object_set(label, "xalign", 0.0f, "yalign", 0.5f, NULL);
+    gtk_grid_attach(GTK_GRID(table), label, 0, 7, 1, 1);
+    minel = gtk_spin_button_new_with_range(0, 90, 1);
+    gtk_spin_button_set_increments(GTK_SPIN_BUTTON(minel), 1, 10);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(minel), TRUE);
+    gtk_widget_set_tooltip_text(minel,
+                                _("Elevation threshold for passes.\n"
+                                  "Passes with maximum elevation below this limit "
+                                  "will be omitted"));
+    gtk_grid_attach(GTK_GRID(table), minel, 1, 7, 1, 1);
+    label = gtk_label_new(_("[deg]"));
+    g_object_set(label, "xalign", 0.0f, "yalign", 0.5f, NULL);
+    gtk_grid_attach(GTK_GRID(table), label, 2, 7, 1, 1);
+
     /* weather station */
     label = gtk_label_new(_("Weather St"));
     g_object_set(label, "xalign", 0.0f, "yalign", 0.5f, NULL);
-    gtk_grid_attach(GTK_GRID(table), label, 0, 7, 1, 1);
+    gtk_grid_attach(GTK_GRID(table), label, 0, 8, 1, 1);
 
     wx = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(wx), 4);
     gtk_widget_set_tooltip_text(wx, _("Four letter code for weather station"));
-    gtk_grid_attach(GTK_GRID(table), wx, 1, 7, 2, 1);
+    gtk_grid_attach(GTK_GRID(table), wx, 1, 8, 2, 1);
 
     wxbut = gtk_button_new_with_label(_("Select"));
     gtk_widget_set_tooltip_text(wxbut, _("Select a weather station"));
     g_signal_connect(wxbut, "clicked", G_CALLBACK(select_location),
                      GUINT_TO_POINTER(SELECTION_MODE_WX));
-    gtk_grid_attach(GTK_GRID(table), wxbut, 3, 7, 1, 1);
+    gtk_grid_attach(GTK_GRID(table), wxbut, 3, 8, 1, 1);
 
 #ifdef HAS_LIBGPS
     /* GPSD enabled */

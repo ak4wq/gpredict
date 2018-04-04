@@ -82,7 +82,7 @@ static void     loc_tree_get_selection(GtkWidget * view,
 gboolean loc_tree_create(const gchar * fname,
                          guint flags,
                          gchar ** loc,
-                         gfloat * lat, gfloat * lon, guint * alt, gchar ** wx)
+                         gfloat * lat, gfloat * lon, guint * alt, guint * minel, gchar ** wx)
 {
     GtkCellRenderer *renderer;  /* tree view cell renderer */
     GtkTreeViewColumn *column;  /* tree view column used to add columns */
@@ -177,6 +177,24 @@ gboolean loc_tree_create(const gchar * fname,
     }
 
     /* --- Column #5 --- */
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes(_("MinEL"),
+                                                      renderer,
+                                                      "text", TREE_COL_MINEL,
+                                                      NULL);
+    gtk_tree_view_column_set_alignment(column, 0.5);
+    gtk_tree_view_column_set_cell_data_func(column,
+                                            renderer,
+                                            loc_tree_int_cell_data_function,
+                                            GUINT_TO_POINTER(TREE_COL_MINEL),
+                                            NULL);
+    gtk_tree_view_insert_column(GTK_TREE_VIEW(view), column, -1);
+    if (!(flags & TREE_COL_FLAG_MINEL))
+    {
+        gtk_tree_view_column_set_visible(column, FALSE);
+    }
+
+    /* --- Column #6 --- */
     renderer = gtk_cell_renderer_text_new();
     column = gtk_tree_view_column_new_with_attributes(_("WX"),
                                                       renderer,

@@ -52,6 +52,7 @@
 #define QTH_CFG_MAIN_SECTION   "QTH"
 #define QTH_CFG_NAME_KEY       "NAME"
 #define QTH_CFG_LOC_KEY        "LOCATION"
+#define QTH_CFG_PRED_MIN_EL_KEY        "MIN_EL"
 #define QTH_CFG_DESC_KEY       "DESCRIPTION"
 #define QTH_CFG_WX_KEY         "WX"
 #define QTH_CFG_LAT_KEY        "LAT"

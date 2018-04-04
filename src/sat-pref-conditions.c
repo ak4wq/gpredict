@@ -27,7 +27,6 @@
 
 
 static GtkWidget *tzero;
-static GtkWidget *minel;
 static GtkWidget *numpass;
 static GtkWidget *lookahead;
 static GtkWidget *res;
@@ -48,9 +47,6 @@ void sat_pref_conditions_ok()
 {
     if (dirty)
     {
-        sat_cfg_set_int(SAT_CFG_INT_PRED_MIN_EL,
-                        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON
-                                                         (minel)));
         sat_cfg_set_int(SAT_CFG_INT_PRED_NUM_PASS,
                         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON
                                                          (numpass)));
@@ -74,7 +70,6 @@ void sat_pref_conditions_ok()
     }
     else if (reset)
     {
-        sat_cfg_reset_int(SAT_CFG_INT_PRED_MIN_EL);
         sat_cfg_reset_int(SAT_CFG_INT_PRED_NUM_PASS);
         sat_cfg_reset_int(SAT_CFG_INT_PRED_LOOK_AHEAD);
         sat_cfg_reset_int(SAT_CFG_INT_PRED_RESOLUTION);
@@ -100,8 +95,6 @@ static void reset_cb(GtkWidget * button, gpointer data)
     (void)data;
 
     /* get defaults */
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(minel),
-                              sat_cfg_get_int_def(SAT_CFG_INT_PRED_MIN_EL));
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(numpass),
                               sat_cfg_get_int_def(SAT_CFG_INT_PRED_NUM_PASS));
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookahead),
@@ -156,36 +149,6 @@ GtkWidget      *sat_pref_conditions_create()
     gtk_grid_set_column_homogeneous(GTK_GRID(table), FALSE);
     gtk_grid_set_row_spacing(GTK_GRID(table), 10);
     gtk_grid_set_column_spacing(GTK_GRID(table), 5);
-
-    /* minimum elevation */
-    label = gtk_label_new(_("Minimum elevation"));
-    g_object_set(label, "xalign", 0.0, "yalign", 0.5, NULL);
-    gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
-    minel = gtk_spin_button_new_with_range(1, 90, 1);
-    gtk_widget_set_tooltip_text(minel,
-                                _("Elevation threshold for passes.\n"
-                                  "Passes with maximum elevation below this limit "
-                                  "will be omitted"));
-    gtk_spin_button_set_digits(GTK_SPIN_BUTTON(minel), 0);
-    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(minel), TRUE);
-    gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(minel), FALSE);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(minel),
-                              sat_cfg_get_int(SAT_CFG_INT_PRED_MIN_EL));
-    g_signal_connect(G_OBJECT(minel), "value-changed",
-                     G_CALLBACK(spin_changed_cb), NULL);
-    gtk_grid_attach(GTK_GRID(table), minel, 1, 0, 1, 1);
-    label = gtk_label_new(_("[deg]"));
-    g_object_set(label, "xalign", 0.0, "yalign", 0.5, NULL);
-    gtk_grid_attach(GTK_GRID(table), label, 2, 0, 1, 1);
-
-    gtk_grid_attach(GTK_GRID(table),
-                    gtk_separator_new(GTK_ORIENTATION_HORIZONTAL),
-                    0, 1, 3, 1);
-
-    label = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), _("<b>Multiple Passes:</b>"));
-    g_object_set(label, "xalign", 0.0, "yalign", 0.5, NULL);
-    gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 
     /* number of passes */
     label = gtk_label_new(_("Number of passes to predict"));
