@@ -410,7 +410,7 @@ GSList         *get_next_passes(sat_t * sat, qth_t * qth, gdouble maxdt,
  */
 pass_t *get_pass(sat_t * sat_in, qth_t * qth, gdouble start, gdouble maxdt)
 {
-    int      min_ele = sat_cfg_get_int(SAT_CFG_INT_PRED_MIN_EL);
+    int      min_ele = qth->minel;
 
     if (min_ele == 0)
         min_ele = 1;

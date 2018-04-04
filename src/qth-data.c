@@ -185,6 +185,23 @@ gint qth_data_read(const gchar * filename, qth_t * qth)
         qth->alt = 0;
     }
 
+    /* QTH minimum elevation */
+    qth->minel = g_key_file_get_integer(qth->data, QTH_CFG_MAIN_SECTION,
+                                      QTH_CFG_PRED_MIN_EL_KEY, &error);
+    if (error != NULL)
+    {
+        sat_log_log(SAT_LOG_LEVEL_ERROR,
+                    _("%s: Error reading QTH minimum elevation (%s)."), __func__,
+                    error->message);
+
+        g_clear_error(&error);
+
+        if (buff != NULL)
+            g_free(buff);
+
+        qth->minel = 0;
+    }
+
     /* QTH Type */
     qth->type = g_key_file_get_integer(qth->data, QTH_CFG_MAIN_SECTION,
                                        QTH_CFG_TYPE_KEY, &error);
@@ -239,8 +256,8 @@ gint qth_data_read(const gchar * filename, qth_t * qth)
 
     /* Now, send debug message and return */
     sat_log_log(SAT_LOG_LEVEL_INFO,
-                _("%s: QTH data: %s, %.4f, %.4f, %d"),
-                __func__, qth->name, qth->lat, qth->lon, qth->alt);
+                _("%s: QTH data: %s, %.4f, %.4f, %d, QRA %s"),
+                __func__, qth->name, qth->lat, qth->lon, qth->alt, qth->qra);
 
     return TRUE;
 }
@@ -293,6 +310,10 @@ gint qth_data_save(const gchar * filename, qth_t * qth)
     /* altitude */
     g_key_file_set_integer(qth->data, QTH_CFG_MAIN_SECTION, QTH_CFG_ALT_KEY,
                            qth->alt);
+
+    /* minimum elevation */
+    g_key_file_set_integer(qth->data, QTH_CFG_MAIN_SECTION, QTH_CFG_PRED_MIN_EL_KEY,
+                           qth->minel);
 
     /* weather station */
     if (qth->wx && (g_utf8_strlen(qth->wx, -1) > 0))
@@ -662,6 +683,7 @@ void qth_init(qth_t * qth)
     qth->lat = 0;
     qth->lon = 0;
     qth->alt = 0;
+    qth->minel = 0;
     qth->type = QTH_STATIC_TYPE;
     qth->gps_data = NULL;
     qth->name = NULL;
@@ -690,6 +712,7 @@ void qth_safe(qth_t * qth)
     qth->lat = 0;
     qth->lon = 0;
     qth->alt = 0;
+    qth->minel = 0;
     qth->gps_data = NULL;
 }
 

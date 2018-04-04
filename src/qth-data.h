@@ -13,6 +13,7 @@ typedef struct {
     gdouble         lon;        /*!< Longitude in dec. deg. East. */
     gint            alt;        /*!< Altitude above sea level in meters. */
     gchar          *qra;        /*!< QRA locator */
+    gint            minel;      /*!< Minimun Elevation. */
     gchar          *wx;         /*!< Weather station code (4 chars). */
     gint            type;       /*!< QTH type (static,gpsd). */
     gchar          *gpsd_server;        /*!< GPSD Server name. */
