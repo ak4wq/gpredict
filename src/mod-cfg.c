@@ -44,6 +44,8 @@ extern GtkWidget *app;
 /* private widgets */
 static GtkWidget *namew;        /* GtkEntry widget for module name */
 static GtkWidget *locw;         /* GtkComboBox for location selection */
+static GtkWidget *dxlocw;       /* GtkComboBox for dx location selection */
+static GtkWidget *mutualfp;     /* (En/Dis)able mutual FootPrint calculations */
 static GtkWidget *satlist;      /* list of selected satellites */
 
 
@@ -288,7 +290,7 @@ static void add_qth_cb(GtkWidget * button, gpointer data)
     }
 }
 
-static GtkWidget *create_loc_selector(GKeyFile * cfgdata)
+static GtkWidget *create_loc_selector(GKeyFile * cfgdata, char location)
 {
     GtkWidget      *combo;
     GDir           *dir = NULL;
@@ -311,11 +313,22 @@ static GtkWidget *create_loc_selector(GKeyFile * cfgdata)
      */
 
     if (g_key_file_has_key
-        (cfgdata, MOD_CFG_GLOBAL_SECTION, MOD_CFG_QTH_FILE_KEY, NULL))
+        (cfgdata, MOD_CFG_GLOBAL_SECTION, MOD_CFG_QTH_FILE_KEY, NULL) && location == 'L')
     {
         defqth = g_key_file_get_string(cfgdata,
                                        MOD_CFG_GLOBAL_SECTION,
                                        MOD_CFG_QTH_FILE_KEY, &error);
+        buffv = g_strsplit(defqth, ".qth", 0);
+        defqthshort = g_strdup(buffv[0]);
+
+        g_strfreev(buffv);
+    }
+    else if (g_key_file_has_key
+        (cfgdata, MOD_CFG_GLOBAL_SECTION, MOD_CFG_DXQTH_FILE_KEY, NULL) && location == 'R')
+    {
+        defqth = g_key_file_get_string(cfgdata,
+                                       MOD_CFG_GLOBAL_SECTION,
+                                       MOD_CFG_DXQTH_FILE_KEY, &error);
         buffv = g_strsplit(defqth, ".qth", 0);
         defqthshort = g_strdup(buffv[0]);
 
@@ -408,6 +421,34 @@ static GtkWidget *create_loc_selector(GKeyFile * cfgdata)
 
     return combo;
 }
+
+/** 
+ * Create mutual FootPrint toggle
+ *
+ * This function creates the toggle check box and initialises it
+ * with the current state
+ */
+static GtkWidget *create_mutualfp_toggle(GKeyFile * cfgdata)
+{   
+    GtkWidget      *checkbox;
+    GError         *error = NULL;
+    gboolean       current_state = FALSE;
+    
+    checkbox = gtk_check_button_new_with_label(_("Calculate mutual Foot Print")
+);
+            
+    if (g_key_file_has_key
+        (cfgdata, MOD_CFG_GLOBAL_SECTION, MOD_CFG_MUTUALFP_KEY, NULL))
+    {
+        current_state = g_key_file_get_boolean(cfgdata,
+                                       MOD_CFG_GLOBAL_SECTION,
+                                       MOD_CFG_MUTUALFP_KEY, &error);
+    }
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbox), current_state);
+
+    return checkbox;
+}
+
 
 /**
  * Compare two rows of the GtkSatSelector.
@@ -669,9 +710,15 @@ static GtkWidget *mod_cfg_editor_create(const gchar * modname,
     }
 
     /* ground station selector */
-    locw = create_loc_selector(cfgdata);
+    locw = create_loc_selector(cfgdata, 'L');
+    dxlocw = create_loc_selector(cfgdata, 'R');
+    mutualfp = create_mutualfp_toggle(cfgdata);
+
     gtk_widget_set_tooltip_text(locw,
                                 _("Select a ground station for this module."));
+
+    gtk_widget_set_tooltip_text(dxlocw,
+                                _("Select a dx ground station for this module."));
 
     grid = gtk_grid_new();
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
@@ -693,6 +740,15 @@ static GtkWidget *mod_cfg_editor_create(const gchar * modname,
     gtk_widget_set_tooltip_text(add, _("Add a new ground station"));
     g_signal_connect(add, "clicked", G_CALLBACK(add_qth_cb), dialog);
     gtk_grid_attach(GTK_GRID(grid), add, 4, 1, 1, 1);
+
+    label = gtk_label_new(_("DX Ground station"));
+    g_object_set(label, "xalign", 0.0f, "yalign", 0.5f, NULL);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), dxlocw, 2, 2, 2, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), mutualfp, 3, 3, 2, 3);
+    gtk_widget_set_tooltip_text(mutualfp,
+                                _("Enable mutual FootPrint calculations"));
 
     vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
@@ -764,6 +820,7 @@ static void mod_cfg_apply(GKeyFile * cfgdata)
     gchar          *buff;
     GtkTreeModel   *model;
     GtkTreeIter     iter;
+    gboolean        mutualfp_state = FALSE;
 
     /* store location */
     buff = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(locw));
@@ -787,6 +844,37 @@ static void mod_cfg_apply(GKeyFile * cfgdata)
     }
 
     g_free(buff);
+
+
+    /* store mutual footprint enable/disable state */
+    mutualfp_state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mutualfp));
+    g_key_file_set_boolean(cfgdata,
+                          MOD_CFG_GLOBAL_SECTION,
+                          MOD_CFG_MUTUALFP_KEY, mutualfp_state);
+
+    /* store remote location */
+    buff = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(dxlocw));
+
+    /* is buff == "** DEFAULT **" clear the configuration key
+       otherwise store the filename
+     */
+    if (!g_ascii_strcasecmp(buff, _("** DEFAULT **")))
+    {
+        g_key_file_remove_key(cfgdata,
+                              MOD_CFG_GLOBAL_SECTION,
+                              MOD_CFG_DXQTH_FILE_KEY, NULL);
+    }
+    else
+    {
+        satstr = g_strconcat(buff, ".qth", NULL);
+        g_key_file_set_string(cfgdata,
+                              MOD_CFG_GLOBAL_SECTION,
+                              MOD_CFG_DXQTH_FILE_KEY, satstr);
+        g_free(satstr);
+    }
+
+    g_free(buff);
+
 
     /* get number of satellites already in list */
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(satlist));
