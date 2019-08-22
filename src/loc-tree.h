@@ -31,6 +31,6 @@ gboolean        loc_tree_create(const gchar * fname,
                                 guint flags,
                                 gchar ** loc,
                                 gfloat * lat,
-                                gfloat * lon, guint * alt, guint * minel, gchar ** wx);
+                                gfloat * lon, guint * alt, gint * minel, gchar ** wx);
 
 #endif

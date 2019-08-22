@@ -60,7 +60,9 @@ static gboolean loc_tree_check_selection_cb(GtkTreeSelection * selection,
 static void     loc_tree_get_selection(GtkWidget * view,
                                        gchar ** loc,
                                        gfloat * lat,
-                                       gfloat * lon, guint * alt, gchar ** wx);
+                                       gfloat * lon, guint * alt,
+                                       gint * minel,
+                                       gchar ** wx);
 
 /**
  * Create and initialise location selector.
@@ -82,7 +84,7 @@ static void     loc_tree_get_selection(GtkWidget * view,
 gboolean loc_tree_create(const gchar * fname,
                          guint flags,
                          gchar ** loc,
-                         gfloat * lat, gfloat * lon, guint * alt, guint * minel, gchar ** wx)
+                         gfloat * lat, gfloat * lon, guint * alt, gint * minel, gchar ** wx)
 {
     GtkCellRenderer *renderer;  /* tree view cell renderer */
     GtkTreeViewColumn *column;  /* tree view column used to add columns */
@@ -186,7 +188,7 @@ gboolean loc_tree_create(const gchar * fname,
     gtk_tree_view_column_set_cell_data_func(column,
                                             renderer,
                                             loc_tree_int_cell_data_function,
-                                            GUINT_TO_POINTER(TREE_COL_MINEL),
+                                            GINT_TO_POINTER(TREE_COL_MINEL),
                                             NULL);
     gtk_tree_view_insert_column(GTK_TREE_VIEW(view), column, -1);
     if (!(flags & TREE_COL_FLAG_MINEL))
@@ -271,7 +273,7 @@ gboolean loc_tree_create(const gchar * fname,
     response = gtk_dialog_run(GTK_DIALOG(dialog));
     if (response == GTK_RESPONSE_ACCEPT)
     {
-        loc_tree_get_selection(view, loc, lat, lon, alt, wx);
+        loc_tree_get_selection(view, loc, lat, lon, alt, minel, wx);
         sat_log_log(SAT_LOG_LEVEL_INFO, _("%s: Selected %s"), __func__, *loc);
         retval = TRUE;
     }
@@ -573,6 +575,7 @@ static gboolean loc_tree_check_selection_cb(GtkTreeSelection * selection,
 static void loc_tree_get_selection(GtkWidget * view,
                                    gchar ** loc,
                                    gfloat * lat, gfloat * lon, guint * alt,
+                                   gint * minel,
                                    gchar ** wx)
 {
     GtkTreeSelection *selection;
@@ -590,7 +593,9 @@ static void loc_tree_get_selection(GtkWidget * view,
                            TREE_COL_NAM, &city,
                            TREE_COL_LAT, lat,
                            TREE_COL_LON, lon,
-                           TREE_COL_ALT, alt, TREE_COL_WX, wx, -1);
+                           TREE_COL_ALT, alt,
+                           TREE_COL_MINEL, minel,
+                           TREE_COL_WX, wx, -1);
 
         /* Location string shall be composed of "City, Country".
            Currently we have City in _loc1 and so we need to obtain

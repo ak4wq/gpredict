@@ -818,8 +818,11 @@ static void view_popup_menu(GtkWidget * treeview, GdkEventButton * event,
         }
         else
         {
-            gtk_event_list_popup_exec(sat, GTK_EVENT_LIST(list)->qth, event,
-                                      GTK_EVENT_LIST(list));
+            gtk_event_list_popup_exec(sat, 
+                                      GTK_EVENT_LIST(list)->qth,
+                                      GTK_EVENT_LIST(list)->dxqth,
+                                      GTK_EVENT_LIST(list)->mutualfp,
+                                      event, GTK_EVENT_LIST(list));
         }
     }
     else

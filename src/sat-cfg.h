@@ -53,6 +53,7 @@ typedef enum {
     SAT_CFG_BOOL_TLE_ADD_NEW,   /*!< Add new satellites to database. */
     SAT_CFG_BOOL_KEEP_LOG_FILES,        /*!< Whether to keep old log files */
     SAT_CFG_BOOL_PRED_USE_REAL_T0,      /*!< Whether to use current time as T0 fro predictions */
+    SAT_CFG_BOOL_MUTUALFP,      /*!< Whether to do mutual FP predictions */
     SAT_CFG_BOOL_NUM            /*!< Number of boolean parameters */
 } sat_cfg_bool_e;
 
@@ -97,6 +98,7 @@ typedef enum {
     SAT_CFG_INT_SINGLE_SAT_FIELDS,      /*!< Single-sat fields. */
     SAT_CFG_INT_SINGLE_SAT_SELECT,      /*!< Single-sat selected satellite. */
     SAT_CFG_INT_EVENT_LIST_REFRESH,     /*!< Event list refresh rate (cycle). */
+	SAT_CFG_INT_PRED_DUMMY,				/*!< Dummy, needed in order for config to be backward compatible. */
     SAT_CFG_INT_PRED_NUM_PASS,  /*!< Number of passes to predict. */
     SAT_CFG_INT_PRED_LOOK_AHEAD,        /*!< Look-ahead time limit in days. */
     SAT_CFG_INT_PRED_RESOLUTION,        /*!< Time resolution in seconds */

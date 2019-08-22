@@ -72,6 +72,7 @@ struct _GtkSkyGlance {
 
     GHashTable     *sats;       /* Local copy of satellites. */
     qth_t          *qth;        /* Pointer to current location. */
+    /* qth_t          *dxqth;      /* Pointer to dx location. */
 
     GSList         *passes;     /* Canvas items representing each pass.
                                  * Each element in the list is of type sky_pass_t.

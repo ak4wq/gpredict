@@ -27,7 +27,8 @@
 #include "sat-pass-dialogs.h"
 
 
-void add_pass_menu_items(GtkWidget * menu, sat_t * sat, qth_t * qth,
+void add_pass_menu_items(GtkWidget * menu, sat_t * sat,
+                         qth_t * qth, qth_t * dxqth, gboolean mutualfp,
                          gdouble * tstamp, GtkWidget * widget)
 {
     GtkWidget      *menuitem;
@@ -38,6 +39,8 @@ void add_pass_menu_items(GtkWidget * menu, sat_t * sat, qth_t * qth,
         menuitem = gtk_menu_item_new_with_label(_("Show current pass"));
         g_object_set_data(G_OBJECT(menuitem), "sat", sat);
         g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+        g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+        g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
         g_object_set_data(G_OBJECT(menuitem), "tstamp", tstamp);
         g_signal_connect(menuitem, "activate",
                          G_CALLBACK(show_current_pass_cb), widget);
@@ -48,6 +51,8 @@ void add_pass_menu_items(GtkWidget * menu, sat_t * sat, qth_t * qth,
     menuitem = gtk_menu_item_new_with_label(_("Show next pass"));
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_object_set_data(G_OBJECT(menuitem), "tstamp", tstamp);
     g_signal_connect(menuitem, "activate", G_CALLBACK(show_next_pass_cb),
                      widget);
@@ -57,6 +62,8 @@ void add_pass_menu_items(GtkWidget * menu, sat_t * sat, qth_t * qth,
     menuitem = gtk_menu_item_new_with_label(_("Future passes"));
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_object_set_data(G_OBJECT(menuitem), "tstamp", tstamp);
     g_signal_connect(menuitem, "activate", G_CALLBACK(show_future_passes_cb),
                      widget);
@@ -67,55 +74,68 @@ void show_current_pass_cb(GtkWidget * menuitem, gpointer data)
 {
     sat_t          *sat;
     qth_t          *qth;
+    qth_t          *dxqth;
+    gboolean       mutualfp;
     gdouble        *tstamp;
     GtkWindow      *toplevel =
         GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data)));
 
     sat = SAT(g_object_get_data(G_OBJECT(menuitem), "sat"));
     qth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "qth"));
+    dxqth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "dxqth"));
+    mutualfp = (gboolean) (g_object_get_data(G_OBJECT(menuitem), "mutualfp"));
     tstamp = (gdouble *) (g_object_get_data(G_OBJECT(menuitem), "tstamp"));
 
     if (sat->el > 0.0)
-        show_next_pass_dialog(sat, qth, *tstamp, toplevel);
+        show_next_pass_dialog(sat, qth, dxqth, mutualfp, *tstamp, toplevel);
 }
 
 void show_next_pass_cb(GtkWidget * menuitem, gpointer data)
 {
     sat_t          *sat;
     qth_t          *qth;
+    qth_t          *dxqth;
+    gboolean       mutualfp;
     gdouble        *tstamp;
     GtkWindow      *toplevel =
         GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data)));
 
     sat = SAT(g_object_get_data(G_OBJECT(menuitem), "sat"));
     qth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "qth"));
+    dxqth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "dxqth"));
+    mutualfp = (gboolean) (g_object_get_data(G_OBJECT(menuitem), "mutualfp"));
     tstamp = (gdouble *) (g_object_get_data(G_OBJECT(menuitem), "tstamp"));
 
     if (sat->el < 0)
-        show_next_pass_dialog(sat, qth, *tstamp, toplevel);
+        show_next_pass_dialog(sat, qth, dxqth, mutualfp, *tstamp, toplevel);
     else
         /*if the satellite is currently visible
            go to end of pass and then add 10 minutes */
-        show_next_pass_dialog(sat, qth, sat->los + 0.007, toplevel);
+        show_next_pass_dialog(sat, qth, dxqth, mutualfp, sat->los + 0.007, toplevel);
 }
 
 void show_future_passes_cb(GtkWidget * menuitem, gpointer data)
 {
     sat_t          *sat;
     qth_t          *qth;
+    qth_t          *dxqth;
+    gboolean       mutualfp;
     gdouble        *tstamp;
     GtkWindow      *toplevel =
         GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data)));
 
     sat = SAT(g_object_get_data(G_OBJECT(menuitem), "sat"));
     qth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "qth"));
+    dxqth = (qth_t *) (g_object_get_data(G_OBJECT(menuitem), "dxqth"));
+    mutualfp = (gboolean) (g_object_get_data(G_OBJECT(menuitem), "mutualfp"));
     tstamp = (gdouble *) (g_object_get_data(G_OBJECT(menuitem), "tstamp"));
 
-    show_future_passes_dialog(sat, qth, *tstamp, toplevel);
+    show_future_passes_dialog(sat, qth, dxqth, mutualfp, *tstamp, toplevel);
 }
 
-void show_next_pass_dialog(sat_t * sat, qth_t * qth, gdouble tstamp,
-                           GtkWindow * toplevel)
+void show_next_pass_dialog(sat_t * sat, 
+                           qth_t * qth, qth_t * dxqth, gboolean mutualfp,
+                           gdouble tstamp, GtkWindow * toplevel)
 {
     GtkWidget      *dialog;
     pass_t         *pass;
@@ -178,8 +198,9 @@ void show_next_pass_dialog(sat_t * sat, qth_t * qth, gdouble tstamp,
 }
 
 
-void show_future_passes_dialog(sat_t * sat, qth_t * qth, gdouble tstamp,
-                               GtkWindow * toplevel)
+void show_future_passes_dialog(sat_t * sat, 
+                               qth_t * qth, qth_t * dxqth, gboolean mutualfp,
+                               gdouble tstamp, GtkWindow * toplevel)
 {
     GSList         *passes = NULL;
     GtkWidget      *dialog;

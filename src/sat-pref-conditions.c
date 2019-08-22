@@ -150,6 +150,11 @@ GtkWidget      *sat_pref_conditions_create()
     gtk_grid_set_row_spacing(GTK_GRID(table), 10);
     gtk_grid_set_column_spacing(GTK_GRID(table), 5);
 
+    label = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label), _("<b>Multiple Passes:</b>"));
+    g_object_set(label, "xalign", 0.0, "yalign", 0.5, NULL);
+    gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
+
     /* number of passes */
     label = gtk_label_new(_("Number of passes to predict"));
     g_object_set(label, "xalign", 0.0, "yalign", 0.5, NULL);

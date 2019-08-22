@@ -33,3 +33,4 @@ stamp-h1
 mkinstalldirs
 libtool
 m4/
+*.swp

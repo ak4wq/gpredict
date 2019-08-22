@@ -36,6 +36,8 @@ struct _gtk_event_list {
 
     GHashTable     *satellites; /*!< Satellites. */
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to current location. */
+    gboolean       mutualfp;    /*!< Mutual FP? */
 
     guint32         flags;      /*!< Flags indicating which columns are visible */
 

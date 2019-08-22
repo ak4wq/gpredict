@@ -411,6 +411,9 @@ GSList         *get_next_passes(sat_t * sat, qth_t * qth, gdouble maxdt,
 pass_t *get_pass(sat_t * sat_in, qth_t * qth, gdouble start, gdouble maxdt)
 {
     int      min_ele = qth->minel;
+    sat_log_log(SAT_LOG_LEVEL_INFO,
+                _("%s: XXX MinEL %d "),
+                __func__, min_ele);
 
     if (min_ele == 0)
         min_ele = 1;

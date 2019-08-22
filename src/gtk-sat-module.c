@@ -172,6 +172,13 @@ static void gtk_sat_module_destroy(GtkWidget * widget)
         module->qth = NULL;
     }
 
+    /* clean up DX QTH */
+    if (module->dxqth)
+    {
+        qth_data_free(module->dxqth);
+        module->dxqth = NULL;
+    }
+
     /* clean up satellites */
     if (module->satellites)
     {
@@ -207,6 +214,11 @@ static void gtk_sat_module_init(GtkSatModule * module)
 
     module->qth = g_try_new0(qth_t, 1);
     qth_init(module->qth);
+
+    module->dxqth = g_try_new0(qth_t, 1);
+    qth_init(module->dxqth);
+
+    module->mutualfp = FALSE;
 
     module->satellites = g_hash_table_new_full(g_int_hash, g_int_equal,
                                                g_free, gtk_sat_module_free_sat);
@@ -917,6 +929,56 @@ static void gtk_sat_module_read_cfg_data(GtkSatModule * module,
     g_free(confdir);
     g_free(qthfile);
 
+    /* get "dx" qth file */
+    buffer = mod_cfg_get_str(module->cfgdata,
+                             MOD_CFG_GLOBAL_SECTION,
+                             MOD_CFG_DXQTH_FILE_KEY, SAT_CFG_STR_DEF_QTH);
+
+    confdir = get_user_conf_dir();
+    qthfile = g_strconcat(confdir, G_DIR_SEPARATOR_S, buffer, NULL);
+
+    /* load DX QTH data */
+    if (!qth_data_read(qthfile, module->dxqth))
+    {
+        /* QTH file was not found for some reason */
+        g_free(buffer);
+        g_free(qthfile);
+
+        /* remove cfg key */
+        g_key_file_remove_key(module->cfgdata,
+                              MOD_CFG_GLOBAL_SECTION,
+                              MOD_CFG_DXQTH_FILE_KEY, NULL);
+
+        /* save modified cfg data to file */
+        mod_cfg_save(module->name, module->cfgdata);
+
+        /* try SAT_CFG_STR_DEF_QTH */
+        buffer = sat_cfg_get_str(SAT_CFG_STR_DEF_QTH);
+        qthfile = g_strconcat(confdir, G_DIR_SEPARATOR_S, buffer, NULL);
+
+        if (!qth_data_read(qthfile, module->dxqth))
+        {
+            sat_log_log(SAT_LOG_LEVEL_ERROR,
+                        _
+                        ("%s: Can not load default 'dx' QTH file %s; using built-in defaults"),
+                        __func__, buffer);
+
+            /* settings are really screwed up; we need some safe values here */
+            qth_safe(module->dxqth);
+        }
+    }
+
+    g_free(buffer);
+    g_free(confdir);
+    g_free(qthfile);
+
+#if 0
+#endif
+    /* get mutualfp bool */
+    module->mutualfp = mod_cfg_get_bool(module->cfgdata,
+                                      MOD_CFG_GLOBAL_SECTION,
+                                      MOD_CFG_MUTUALFP_KEY,
+                                      SAT_CFG_BOOL_MUTUALFP);
     /* get timeout value */
     module->timeout = mod_cfg_get_int(module->cfgdata,
                                       MOD_CFG_GLOBAL_SECTION,

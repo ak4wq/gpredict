@@ -190,7 +190,7 @@ gint qth_data_read(const gchar * filename, qth_t * qth)
                                       QTH_CFG_PRED_MIN_EL_KEY, &error);
     if (error != NULL)
     {
-        sat_log_log(SAT_LOG_LEVEL_ERROR,
+        sat_log_log(SAT_LOG_LEVEL_INFO,
                     _("%s: Error reading QTH minimum elevation (%s)."), __func__,
                     error->message);
 

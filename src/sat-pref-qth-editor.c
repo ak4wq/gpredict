@@ -92,7 +92,7 @@ static void update_widgets(GtkTreeView * treeview)
     gdouble         qthlat;     /* latitude */
     gdouble         qthlon;     /* longitude */
     guint           qthalt;     /* altitude */
-    guint           qthminel;   /* minimum elevation */
+    gint           qthminel;   /* minimum elevation */
     gchar          *qthwx;      /* weather station */
     gchar          *qthgpsdserver;      /* gpsdserver */
     guint           qthtype;    /* type */
@@ -224,7 +224,7 @@ static gboolean apply_changes(GtkTreeView * treeview, gboolean new)
     gdouble         qthlat;
     gdouble         qthlon;
     guint           qthalt;
-    guint           qthminel;
+    gint           qthminel;
     guint           qthtype;
     guint           qthgpsdport;
     const gchar    *qthqra;
@@ -372,7 +372,7 @@ static void select_location(GtkWidget * widget, gpointer data)
     gfloat          qthlat;
     gfloat          qthlon;
     guint           qthalt;
-    guint           qthminel;
+    gint           qthminel;
     gboolean        selected = FALSE;
 
     (void)widget;               /* avoid unused parameter compiler warning */

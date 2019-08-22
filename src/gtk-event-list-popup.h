@@ -33,7 +33,8 @@
 #include "gtk-event-list.h"
 
 
-void            gtk_event_list_popup_exec(sat_t * sat, qth_t * qth,
+void            gtk_event_list_popup_exec(sat_t * sat,
+                                          qth_t * qth, qth_t * dxqth, gboolean mutualfp,
                                           GdkEventButton * event,
                                           GtkEventList * list);
 

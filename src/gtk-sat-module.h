@@ -77,6 +77,8 @@ struct _gtk_sat_module {
     GKeyFile       *cfgdata;    /*!< Configuration data. */
     qth_t          *qth;        /*!< QTH information. */
     qth_small_t     qth_event;  /*!< QTH information for last AOS/LOS update. */
+    qth_t          *dxqth;      /*!< DX QTH information. */
+    gboolean        mutualfp;   /*!< Flag indicating whether mutual FP calculations is active */
     GHashTable     *satellites; /*!< Satellites. */
 
     guint32         timeout;    /*!< Timeout value [msec] */

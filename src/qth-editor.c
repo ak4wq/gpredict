@@ -273,7 +273,7 @@ static void select_location(GtkWidget * widget, gpointer data)
     gfloat          qthlat;
     gfloat          qthlon;
     guint           qthalt;
-    guint           qthminel;
+    gint           qthminel;
     gboolean        selected = FALSE;
 
     (void)widget;
