@@ -57,6 +57,8 @@ struct _gtk_sat_list {
 
     GHashTable     *satellites; /*!< Satellites. */
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to dx location. */
+    gboolean        mutualfp;   /*!< Show mutual FP. */
 
     guint32         flags;      /*!< Flags indicating which columns are visible */
     guint           refresh;    /*!< Refresh rate, ie. how many cycles should pass between updates */

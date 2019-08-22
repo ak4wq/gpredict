@@ -33,6 +33,7 @@
 
 
 void            gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
+                                       qth_t * dxqth, gboolean mutualfp,
                                        GtkSatMap * satmap,
                                        GdkEventButton * event,
                                        GtkWidget * toplevel);

@@ -1339,7 +1339,9 @@ static void view_popup_menu(GtkWidget * treeview, GdkEventButton * event,
         }
         else
         {
-            gtk_sat_list_popup_exec(sat, GTK_SAT_LIST(list)->qth, event,
+            gtk_sat_list_popup_exec(sat, GTK_SAT_LIST(list)->qth,
+                                    GTK_SAT_LIST(list)->dxqth,
+                                    GTK_SAT_LIST(list)->mutualfp, event,
                                     GTK_SAT_LIST(list));
         }
     }

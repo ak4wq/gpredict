@@ -86,6 +86,9 @@ typedef struct {
     GooCanvasItemModel *qthmark;        /*!< QTH marker, e.g. small rectangle. */
     GooCanvasItemModel *qthlabel;       /*!< Label showing the QTH name. */
 
+    GooCanvasItemModel *dxqthmark;      /*!< DX QTH marker, e.g. small rectangle. */
+    GooCanvasItemModel *dxqthlabel;     /*!< Label showing the DX QTH name. */
+
     GooCanvasItemModel *locnam; /*!< Location name. */
     GooCanvasItemModel *curs;   /*!< Cursor tracking text. */
     GooCanvasItemModel *next;   /*!< Next event text. */
@@ -108,6 +111,8 @@ typedef struct {
     GKeyFile       *cfgdata;    /*!< Module configuration data. */
     GHashTable     *sats;       /*!< Pointer to satellites (owned by parent GtkSatModule). */
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to dx location. */
+    gboolean        mutualfp;   /*!< Show mutual FP. */
 
     GHashTable     *obj;        /*!< Canvas items representing each satellite. */
     GHashTable     *showtracks; /*!< A hash of satellites to show tracks for. */
@@ -141,7 +146,8 @@ struct _GtkSatMapClass {
 
 GType           gtk_sat_map_get_type(void);
 GtkWidget      *gtk_sat_map_new(GKeyFile * cfgdata,
-                                GHashTable * sats, qth_t * qth);
+                                GHashTable * sats, qth_t * qth,
+                                qth_t * dxqth, gboolean mutualfp);
 void            gtk_sat_map_update(GtkWidget * widget);
 void            gtk_sat_map_reconf(GtkWidget * widget, GKeyFile * cfgdat);
 void            gtk_sat_map_lonlat_to_xy(GtkSatMap * m,

@@ -32,6 +32,7 @@
 #include "sgpsdp/sgp4sdp4.h"
 
 void            gtk_sat_list_popup_exec(sat_t * sat, qth_t * qth,
+                                        qth_t * dxqth, gboolean mutualfp,
                                         GdkEventButton * event,
                                         GtkSatList * list);
 

@@ -33,6 +33,7 @@
 
 
 void            gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth,
+                                          qth_t * dxqth, gboolean mutualfp,
                                           GtkPolarView * polv,
                                           GdkEventButton * event,
                                           GtkWidget * toplevel);

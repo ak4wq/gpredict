@@ -48,7 +48,9 @@
  * @param event The mouse-click related event info.
  * @param toplevel The top level window.
  */
-void gtk_sat_list_popup_exec(sat_t * sat, qth_t * qth, GdkEventButton * event,
+void gtk_sat_list_popup_exec(sat_t * sat, qth_t * qth,
+                             qth_t * dxqth, gboolean mutualfp,
+                             GdkEventButton * event,
                              GtkSatList * list)
 {
     GtkWidget      *menu;
@@ -63,6 +65,8 @@ void gtk_sat_list_popup_exec(sat_t * sat, qth_t * qth, GdkEventButton * event,
     /* attach data to menuitem and connect callback */
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_signal_connect(menuitem, "activate",
                      G_CALLBACK(show_sat_info_menu_cb),
                      gtk_widget_get_toplevel(GTK_WIDGET(list)));
@@ -74,7 +78,7 @@ void gtk_sat_list_popup_exec(sat_t * sat, qth_t * qth, GdkEventButton * event,
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 
     /* add the menu items for current,next, and future passes. */
-    add_pass_menu_items(menu, sat, qth, &list->tstamp, GTK_WIDGET(list));
+    add_pass_menu_items(menu, sat, qth, dxqth, mutualfp, &list->tstamp, GTK_WIDGET(list));
 
     gtk_widget_show_all(menu);
 

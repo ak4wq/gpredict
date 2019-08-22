@@ -224,6 +224,8 @@ static gboolean on_button_press(GooCanvasItem * item,
         if (sat != NULL)
         {
             gtk_polar_view_popup_exec(sat, polv->qth,
+                                        polv->dxqth,
+                                        polv->mutualfp,
                                       polv, event,
                                       gtk_widget_get_toplevel(GTK_WIDGET
                                                               (polv)));

@@ -304,7 +304,7 @@ static GtkWidget *create_view(GtkSatModule * module, guint num)
 
     case GTK_SAT_MOD_VIEW_MAP:
         view = gtk_sat_map_new(module->cfgdata,
-                               module->satellites, module->qth);
+                               module->satellites, module->qth, module->dxqth, module->mutualfp);
         break;
 
     case GTK_SAT_MOD_VIEW_POLAR:
@@ -314,7 +314,7 @@ static GtkWidget *create_view(GtkSatModule * module, guint num)
 
     case GTK_SAT_MOD_VIEW_SINGLE:
         view = gtk_single_sat_new(module->cfgdata,
-                                  module->satellites, module->qth, 0);
+                                  module->satellites, module->qth, module->dxqth, module->mutualfp, 0);
         break;
 
     case GTK_SAT_MOD_VIEW_EVENT:

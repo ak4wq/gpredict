@@ -151,6 +151,8 @@ static void gtk_sat_map_init(GtkSatMap * satmap)
 {
     satmap->sats = NULL;
     satmap->qth = NULL;
+    satmap->dxqth = NULL;
+    satmap->mutualfp = FALSE;
     satmap->obj = NULL;
     satmap->showtracks = g_hash_table_new_full(g_int_hash, g_int_equal,
                                                NULL, NULL);
@@ -182,7 +184,8 @@ static void gtk_sat_map_destroy(GtkWidget * widget)
 }
 
 GtkWidget      *gtk_sat_map_new(GKeyFile * cfgdata, GHashTable * sats,
-                                qth_t * qth)
+                                qth_t * qth,
+                                qth_t * dxqth, gboolean mutualfp)
 {
     GtkSatMap      *satmap;
     GooCanvasItemModel *root;
@@ -193,6 +196,8 @@ GtkWidget      *gtk_sat_map_new(GKeyFile * cfgdata, GHashTable * sats,
     satmap->cfgdata = cfgdata;
     satmap->sats = sats;
     satmap->qth = qth;
+    satmap->dxqth = dxqth;
+    satmap->mutualfp = mutualfp;
 
     satmap->obj = g_hash_table_new_full(g_int_hash, g_int_equal, g_free, NULL);
 
@@ -283,6 +288,7 @@ static GooCanvasItemModel *create_canvas_model(GtkSatMap * satmap)
     GooCanvasItemModel *root;
     gchar          *buff;
     gfloat          x, y;
+    gfloat          dxx, dxy;
     guint32         col;
 
     root = goo_canvas_group_model_new(NULL, NULL);
@@ -322,6 +328,45 @@ static GooCanvasItemModel *create_canvas_model(GtkSatMap * satmap)
                                                  GOO_CANVAS_ANCHOR_NORTH,
                                                  "font", "Sans 8",
                                                  "fill-color-rgba", col, NULL);
+
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: satmap->dxqth XXX %p"), __FILE__, __LINE__, satmap->dxqth);
+
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: qthinfo XXX %s"), __FILE__, __LINE__, satmap->qthinfo?"True":"False");
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: mutualfp XXX %s"), __FILE__, __LINE__, satmap->mutualfp?"True":"False");
+    /* DX QTH mark */
+    if(satmap->mutualfp) {
+
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: dxqth->name XXX %s lat:%.0f lon:%.0f"), __FILE__, __LINE__, satmap->dxqth->name, satmap->dxqth->lat, satmap->dxqth->lon);
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: qth->name XXX %s lat:%.0f lon:%.0f"), __FILE__, __LINE__, satmap->qth->name, satmap->qth->lat, satmap->qth->lon);
+#if 0
+    col = mod_cfg_get_int(satmap->cfgdata,
+                          MOD_CFG_MAP_SECTION,
+                          MOD_CFG_MAP_QTH_COL, SAT_CFG_INT_MAP_QTH_COL);
+#endif
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: qth->name XXX %s x:%.0f y:%.0f"), __FILE__, __LINE__, satmap->qth->name, x, y);
+    lonlat_to_xy(satmap, satmap->dxqth->lon, satmap->dxqth->lat, &dxx, &dxy);
+    sat_log_log(SAT_LOG_LEVEL_DEBUG,
+                _("%s:%d: dxqth->name XXX %s dxx:%.0f dxy:%.0f"), __FILE__, __LINE__, satmap->dxqth->name, dxx, dxy);
+    satmap->dxqthmark = goo_canvas_rect_model_new(root,
+                                                dxx - MARKER_SIZE_HALF,
+                                                dxy - MARKER_SIZE_HALF,
+                                                2 * MARKER_SIZE_HALF,
+                                                2 * MARKER_SIZE_HALF,
+                                                "fill-color-rgba", col,
+                                                "stroke-color-rgba", col,
+                                                NULL);
+    satmap->dxqthlabel = goo_canvas_text_model_new(root, satmap->dxqth->name,
+                                                 dxx, dxy + 2, -1,
+                                                 GOO_CANVAS_ANCHOR_NORTH,
+                                                 "font", "Sans 8",
+                                                 "fill-color-rgba", col, NULL);
+    }
 
     /* QTH info */
     col = mod_cfg_get_int(satmap->cfgdata,
@@ -795,7 +840,9 @@ static gboolean on_button_press(GooCanvasItem * item,
         sat = SAT(g_hash_table_lookup(satmap->sats, catpoint));
         if (sat != NULL)
         {
-            gtk_sat_map_popup_exec(sat, satmap->qth, satmap, event,
+            gtk_sat_map_popup_exec(sat, satmap->qth,
+            			   satmap->dxqth, satmap->mutualfp, 
+                                   satmap, event,
                                    gtk_widget_get_toplevel(GTK_WIDGET
                                                            (satmap)));
         }
@@ -2593,9 +2640,6 @@ void gtk_sat_map_lonlat_to_xy(GtkSatMap * m,
 void gtk_sat_map_reload_sats(GtkWidget * satmap, GHashTable * sats)
 {
     GTK_SAT_MAP(satmap)->sats = sats;
-    GTK_SAT_MAP(satmap)->naos = 0.0;
-    GTK_SAT_MAP(satmap)->ncat = 0;
-
     /* reset ground track orbit to force repaint */
     g_hash_table_foreach(GTK_SAT_MAP(satmap)->obj, reset_ground_track, NULL);
 }

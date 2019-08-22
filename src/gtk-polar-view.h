@@ -89,6 +89,8 @@ struct _GtkPolarView {
     GKeyFile       *cfgdata;    /*!< module configuration data */
     GHashTable     *sats;       /*!< Satellites. */
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to dx location. */
+    gboolean        mutualfp;   /*!< Show mutual FP. */
 
     GHashTable     *obj;        /*!< Canvas items representing each visible satellite */
 

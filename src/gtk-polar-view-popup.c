@@ -58,7 +58,8 @@ static void     track_toggled(GtkCheckMenuItem * item, gpointer data);
  * @param event The mouse-click related event info
  * @param toplevel The toplevel window or NULL.
  */
-void gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth, GtkPolarView * pview,
+void gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth, qth_t * dxqth, gboolean mutualfp,
+                                GtkPolarView * pview,
                                GdkEventButton * event, GtkWidget * toplevel)
 {
     GtkWidget      *menu;
@@ -75,6 +76,8 @@ void gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth, GtkPolarView * pview,
     /* attach data to menuitem and connect callback */
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_signal_connect(menuitem, "activate", G_CALLBACK(show_sat_info_menu_cb),
                      toplevel);
 
@@ -85,7 +88,7 @@ void gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth, GtkPolarView * pview,
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 
     /* add the menu items for current,next, and future passes. */
-    add_pass_menu_items(menu, sat, qth, &pview->tstamp, GTK_WIDGET(pview));
+    add_pass_menu_items(menu, sat, qth, dxqth, mutualfp, &pview->tstamp, GTK_WIDGET(pview));
 
     /* separator */
     menuitem = gtk_separator_menu_item_new();
@@ -102,6 +105,8 @@ void gtk_polar_view_popup_exec(sat_t * sat, qth_t * qth, GtkPolarView * pview,
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
     g_object_set_data(G_OBJECT(menuitem), "obj", obj);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem),
                                    obj->showtrack);

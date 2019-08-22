@@ -60,6 +60,7 @@ static void     track_toggled(GtkCheckMenuItem * item, gpointer data);
  *
  */
 void gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
+                            qth_t * dxqth, gboolean mutualfp,
                             GtkSatMap * satmap,
                             GdkEventButton * event, GtkWidget * toplevel)
 {
@@ -77,6 +78,8 @@ void gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
     /* attach data to menuitem and connect callback */
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_signal_connect(menuitem, "activate", G_CALLBACK(show_sat_info_menu_cb),
                      toplevel);
 
@@ -87,7 +90,7 @@ void gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 
     /* add the menu items for current,next, and future passes. */
-    add_pass_menu_items(menu, sat, qth, &satmap->tstamp, GTK_WIDGET(satmap));
+    add_pass_menu_items(menu, sat, qth, dxqth, mutualfp, &satmap->tstamp, GTK_WIDGET(satmap));
 
     /* separator */
     menuitem = gtk_separator_menu_item_new();
@@ -104,6 +107,8 @@ void gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "obj", obj);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem),
                                    obj->showcov);
@@ -116,6 +121,8 @@ void gtk_sat_map_popup_exec(sat_t * sat, qth_t * qth,
                                    obj->showtrack);
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", mutualfp);
     g_object_set_data(G_OBJECT(menuitem), "obj", obj);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem),

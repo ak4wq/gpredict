@@ -491,6 +491,8 @@ static void gtk_single_sat_popup_cb(GtkWidget * button, gpointer data)
     /* attach data to menuitem and connect callback */
     g_object_set_data(G_OBJECT(menuitem), "sat", sat);
     g_object_set_data(G_OBJECT(menuitem), "qth", single_sat->qth);
+    g_object_set_data(G_OBJECT(menuitem), "dxqth", single_sat->dxqth);
+    g_object_set_data(G_OBJECT(menuitem), "mutualfp", single_sat->mutualfp);
     g_signal_connect(menuitem, "activate",
                      G_CALLBACK(show_sat_info_menu_cb),
                      gtk_widget_get_toplevel(button));
@@ -502,7 +504,8 @@ static void gtk_single_sat_popup_cb(GtkWidget * button, gpointer data)
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 
     /* add the menu items for current,next, and future passes. */
-    add_pass_menu_items(menu, sat, single_sat->qth, &single_sat->tstamp, data);
+    add_pass_menu_items(menu, sat, single_sat->qth, single_sat->dxqth,
+                         single_sat->mutualfp, &single_sat->tstamp, data);
 
     /* separator */
     menuitem = gtk_separator_menu_item_new();
@@ -557,7 +560,9 @@ void gtk_single_sat_reload_sats(GtkWidget * single_sat, GHashTable * sats)
  */
 void gtk_single_sat_reconf(GtkWidget * widget,
                            GKeyFile * newcfg,
-                           GHashTable * sats, qth_t * qth, gboolean local)
+                           GHashTable * sats, qth_t * qth,
+                           qth_t * dxqth, gboolean mutualfp,
+                           gboolean local)
 {
     guint32         fields;
 
@@ -579,6 +584,12 @@ void gtk_single_sat_reconf(GtkWidget * widget,
 
     /* QTH may have changed too since we have a default QTH */
     GTK_SINGLE_SAT(widget)->qth = qth;
+
+    /* DXQTH may have changed too since we have a default QTH */
+    GTK_SINGLE_SAT(widget)->dxqth = dxqth;
+
+    /* Still doing mutual FP?*/
+    GTK_SINGLE_SAT(widget)->mutualfp = mutualfp;
 
     /* get refresh rate and cycle counter */
     GTK_SINGLE_SAT(widget)->refresh = mod_cfg_get_int(newcfg,
@@ -700,7 +711,9 @@ GType gtk_single_sat_get_type()
 }
 
 GtkWidget      *gtk_single_sat_new(GKeyFile * cfgdata, GHashTable * sats,
-                                   qth_t * qth, guint32 fields)
+                                   qth_t * qth,
+                                   qth_t * dxqth, gboolean mutualfp,
+                                   guint32 fields)
 {
     GtkWidget      *widget;
     GtkSingleSat   *single_sat;
@@ -725,6 +738,8 @@ GtkWidget      *gtk_single_sat_new(GKeyFile * cfgdata, GHashTable * sats,
     g_hash_table_foreach(sats, store_sats, widget);
     single_sat->selected = 0;
     single_sat->qth = qth;
+    single_sat->dxqth = dxqth;
+    single_sat->mutualfp = mutualfp;
     single_sat->cfgdata = cfgdata;
 
     /* initialise column flags */

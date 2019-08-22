@@ -89,6 +89,8 @@ struct _GtkPolarPlot {
     GooCanvasItemModel *trtick[TRACK_TICK_NUM]; /*!< Time ticks along the sky track */
 
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to dx location. */
+    gboolean        mutualfp;   /*!< Show mutual FP. */
 
     guint           cx;         /*!< center X */
     guint           cy;         /*!< center Y */

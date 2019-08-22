@@ -97,6 +97,8 @@ struct _gtk_single_sat {
     GKeyFile       *cfgdata;    /*!< Configuration data. */
     GSList         *sats;       /*!< Satellites. */
     qth_t          *qth;        /*!< Pointer to current location. */
+    qth_t          *dxqth;      /*!< Pointer to dx location. */
+    gboolean        mutualfp;   /*!< Show mutual FP. */
 
 
     guint32         flags;      /*!< Flags indicating which columns are visible. */
@@ -116,12 +118,16 @@ struct _GtkSingleSatClass {
 GType           gtk_single_sat_get_type(void);
 GtkWidget      *gtk_single_sat_new(GKeyFile * cfgdata,
                                    GHashTable * sats,
-                                   qth_t * qth, guint32 fields);
+                                   qth_t * qth,
+                                   qth_t * dxqth, gboolean mutualfp,
+                                   guint32 fields);
 void            gtk_single_sat_update(GtkWidget * widget);
 void            gtk_single_sat_reconf(GtkWidget * widget,
                                       GKeyFile * newcfg,
                                       GHashTable * sats,
-                                      qth_t * qth, gboolean local);
+                                      qth_t * qth,
+                                      qth_t * dxqth, gboolean mutualfp,
+                                      gboolean local);
 
 void            gtk_single_sat_reload_sats(GtkWidget * single_sat,
                                            GHashTable * sats);
